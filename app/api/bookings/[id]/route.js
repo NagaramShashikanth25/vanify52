@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { currentUser } from "@/lib/auth";
 import { sameOrigin } from "@/lib/safe";
-import { createIssue, getBooking, rateBooking, setBookingStatus } from "@/lib/repo";
+import { cancelBooking, createIssue, getBooking, rateBooking } from "@/lib/repo";
 
 export async function POST(req, { params }) {
   const { id } = await params;
@@ -19,10 +19,11 @@ export async function POST(req, { params }) {
 
   switch (action) {
     case "cancel":
-      if (!["SEARCHING", "ACCEPTED"].includes(booking.status)) {
+      // Conditional in the database too, so a professional tapping "on the way"
+      // at the same moment cannot slip past this check.
+      if (!(await cancelBooking(booking.id, user.id))) {
         return NextResponse.json({ error: "This job has already started. Call support to cancel." }, { status: 400 });
       }
-      await setBookingStatus(booking.id, "CANCELLED", "Cancelled by customer");
       return NextResponse.json({ ok: true });
 
     case "rate": {

@@ -3,9 +3,11 @@ import { requireRole } from "@/lib/auth";
 import { throttle, clearThrottle } from "@/lib/guard";
 import { sameOrigin } from "@/lib/safe";
 import {
-  acceptBooking, activePartnerJob, completeBooking, getBooking,
-  releaseBooking, setBookingStatus,
+  acceptBooking, activePartnerJob, advanceBooking, completeBooking, getBooking, releaseBooking,
 } from "@/lib/repo";
+
+const moved = () =>
+  NextResponse.json({ error: "This job has changed since you opened it. Refresh to see where it stands." }, { status: 409 });
 
 export async function POST(req, { params }) {
   const { id } = await params;
@@ -18,29 +20,31 @@ export async function POST(req, { params }) {
   const { action, otp } = await req.json();
   const booking = await getBooking(id);
   if (!booking) return NextResponse.json({ error: "That job no longer exists." }, { status: 404 });
+  const partnerId = user.partner.id;
 
   if (action === "accept") {
-    if (await activePartnerJob(user.partner.id)) {
+    if (await activePartnerJob(partnerId)) {
       return NextResponse.json({ error: "Finish your current job before accepting another." }, { status: 409 });
     }
-    const got = await acceptBooking(booking.id, user.partner.id, user.name);
-    if (!got) return NextResponse.json({ error: "Another professional took that job." }, { status: 409 });
+    const got = await acceptBooking(booking.id, user.partner, user.name);
+    if (!got) return NextResponse.json({ error: "That job is no longer available to you." }, { status: 409 });
     return NextResponse.json({ ok: true });
   }
 
   // Everything below is only for the partner who owns the job.
-  if (booking.partner_id !== user.partner.id) {
+  if (booking.partner_id !== partnerId) {
     return NextResponse.json({ error: "That job is not assigned to you." }, { status: 403 });
   }
 
   switch (action) {
     case "on_way":
-      await setBookingStatus(booking.id, "ON_WAY", "Professional is on the way");
+      if (!(await advanceBooking(booking.id, partnerId, ["ACCEPTED"], "ON_WAY", "Professional is on the way"))) return moved();
       return NextResponse.json({ ok: true });
 
     case "start": {
+      if (!["ACCEPTED", "ON_WAY"].includes(booking.status)) return moved();
       // A four-digit code is 10,000 guesses, so cap the attempts per job.
-      const key = `otp:${booking.id}:${user.partner.id}`;
+      const key = `otp:${booking.id}:${partnerId}`;
       const gate = throttle(key, { limit: 5, window: 1800 });
       if (!gate.ok) {
         return NextResponse.json(
@@ -52,7 +56,7 @@ export async function POST(req, { params }) {
         return NextResponse.json({ error: "That start code does not match this booking." }, { status: 400 });
       }
       clearThrottle(key);
-      await setBookingStatus(booking.id, "STARTED", "Work started");
+      if (!(await advanceBooking(booking.id, partnerId, ["ACCEPTED", "ON_WAY"], "STARTED", "Work started"))) return moved();
       return NextResponse.json({ ok: true });
     }
 
@@ -60,12 +64,13 @@ export async function POST(req, { params }) {
       if (booking.status !== "STARTED") {
         return NextResponse.json({ error: "Enter the customer's start code first." }, { status: 400 });
       }
-      const { net } = await completeBooking(booking.id);
-      return NextResponse.json({ ok: true, net });
+      const done = await completeBooking(booking.id, partnerId);
+      if (!done) return moved();
+      return NextResponse.json({ ok: true, net: done.net });
     }
 
     case "release":
-      await releaseBooking(booking.id);
+      if (!(await releaseBooking(booking.id, partnerId))) return moved();
       return NextResponse.json({ ok: true });
 
     default:
