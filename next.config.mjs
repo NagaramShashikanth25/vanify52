@@ -30,6 +30,11 @@ const nextConfig = {
   poweredByHeader: false,            // stop advertising the framework version
   // Both database drivers load native/WASM files at runtime and must not be bundled.
   serverExternalPackages: ["@electric-sql/pglite", "pg"],
+  // PGlite (23 MB of WASM) is only for local development. Deployed functions always
+  // use DATABASE_URL, so leave it out of them: smaller functions start faster.
+  outputFileTracingExcludes: {
+    "/**": ["node_modules/@electric-sql/pglite/**"],
+  },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },

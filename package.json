@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "engines": {
-    "node": ">=20.9.0"
+    "node": "22.x"
   },
   "scripts": {
     "setup": "node scripts/setup-db.mjs",
@@ -13,7 +13,7 @@
     "db:reset": "node scripts/setup-db.mjs --force",
     "create-admin": "node scripts/create-admin.mjs",
     "doctor": "node scripts/doctor.mjs",
-    "test:unit": "node --import ./tests/register.mjs tests/unit.mjs",
+    "test:unit": "node --no-warnings --import ./tests/register.mjs tests/unit.mjs",
     "test:e2e": "node tests/e2e.mjs"
   },
   "dependencies": {
