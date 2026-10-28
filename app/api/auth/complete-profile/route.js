@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { currentUser, signSession, setSessionCookie } from "@/lib/auth";
-import { findUserByPhone, setUserPhone } from "@/lib/repo";
+import { duplicateField, findUserByPhone, setUserPhone } from "@/lib/repo";
 import { sameOrigin } from "@/lib/safe";
 
 export async function POST(req) {
@@ -20,7 +20,14 @@ export async function POST(req) {
     return NextResponse.json({ error: "That number already belongs to another account.", field: "phone" }, { status: 400 });
   }
 
-  await setUserPhone(user.id, digits);
+  try {
+    await setUserPhone(user.id, digits);
+  } catch (err) {
+    if (duplicateField(err) === "phone") {
+      return NextResponse.json({ error: "That number already belongs to another account.", field: "phone" }, { status: 400 });
+    }
+    throw err;
+  }
   await setSessionCookie(await signSession({ ...user, phone: digits }));   // refresh the claims
   return NextResponse.json({ ok: true });
 }

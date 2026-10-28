@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createUser, createPartner, findUserByPhone, getPartnerByUser, listCategories, setUserRole } from "@/lib/repo";
+import { createUser, createPartner, duplicateField, findUserByPhone, getPartnerByUser, listCategories, setUserRole } from "@/lib/repo";
 import { hashPassword, signSession, setSessionCookie, currentUser } from "@/lib/auth";
 import { ZONES } from "@/lib/config";
 import { sameOrigin } from "@/lib/safe";
@@ -36,7 +36,13 @@ export async function POST(req) {
   if (!password || password.length < 8) return bad("Use at least 8 characters for your password.", "password");
   if (await findUserByPhone(phone)) return bad("That number is already registered. Sign in instead.", "phone");
 
-  const user = await createUser({ name: name.trim(), phone, passwordHash: await hashPassword(password), role: "PARTNER" });
+  let user;
+  try {
+    user = await createUser({ name: name.trim(), phone, passwordHash: await hashPassword(password), role: "PARTNER" });
+  } catch (err) {
+    if (duplicateField(err) === "phone") return bad("That number is already registered. Sign in instead.", "phone");
+    throw err;
+  }
   await createPartner(user.id, { skills: cleanSkills, zones: cleanZones });
   await setSessionCookie(await signSession(user));
   return NextResponse.json({ ok: true, next: "/partner/dashboard" });

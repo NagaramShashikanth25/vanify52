@@ -35,7 +35,7 @@ export default function RegisterForm() {
         <input id="phone" value={form.phone} onChange={set("phone")} inputMode="numeric" autoComplete="tel"
           placeholder="10-digit number" />
       </div>
-      <div className="field">
+      <div className={`field ${field === "email" ? "bad" : ""}`}>
         <label htmlFor="email">Email (optional)</label>
         <input id="email" type="email" value={form.email} onChange={set("email")} autoComplete="email" />
       </div>
