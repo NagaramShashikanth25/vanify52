@@ -1,10 +1,12 @@
 import StatusPill from "@/components/StatusPill";
+import { pageUser } from "@/lib/auth";
 import { listAllBookings } from "@/lib/repo";
 import { formatDay, money } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminBookings() {
+  await pageUser("ADMIN");
   const bookings = await listAllBookings();
 
   return (

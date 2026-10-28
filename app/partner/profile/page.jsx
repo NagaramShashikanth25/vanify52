@@ -1,7 +1,7 @@
 import PartnerHeader from "@/components/PartnerHeader";
 import SiteFooter from "@/components/SiteFooter";
 import CoverageEditor from "@/components/CoverageEditor";
-import { currentUser } from "@/lib/auth";
+import { pageUser } from "@/lib/auth";
 import { listCategories } from "@/lib/repo";
 import { ZONES } from "@/lib/config";
 import { initials } from "@/lib/format";
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Profile" };
 
 export default async function PartnerProfile() {
-  const user = await currentUser();
+  const user = await pageUser("PARTNER", "ADMIN");
   const partner = user.partner;
   if (!partner) return null;
 

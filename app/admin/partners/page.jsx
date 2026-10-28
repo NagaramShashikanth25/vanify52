@@ -1,9 +1,11 @@
 import PartnerStatusButton from "@/components/PartnerStatusButton";
+import { pageUser } from "@/lib/auth";
 import { listCategories, listPartners } from "@/lib/repo";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminPartners() {
+  await pageUser("ADMIN");
   const partners = await listPartners();
   const categories = await listCategories();
   const catName = (id) => categories.find((c) => c.id === id)?.name;

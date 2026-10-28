@@ -5,7 +5,7 @@ import SiteFooter from "@/components/SiteFooter";
 import StatusPill from "@/components/StatusPill";
 import BookingActions from "@/components/BookingActions";
 import { Verified } from "@/components/Icons";
-import { currentUser } from "@/lib/auth";
+import { pageUser } from "@/lib/auth";
 import { getBooking } from "@/lib/repo";
 import { formatDay, initials, money } from "@/lib/format";
 import { STATUS_FLOW } from "@/lib/config";
@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 export default async function BookingDetail({ params }) {
   const { id } = await params;
-  const user = await currentUser();
+  const user = await pageUser();
   const booking = await getBooking(id);
   if (!booking || booking.customer_id !== user.id) notFound();
 

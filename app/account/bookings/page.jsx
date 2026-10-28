@@ -2,7 +2,7 @@ import Link from "next/link";
 import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import StatusPill from "@/components/StatusPill";
-import { currentUser } from "@/lib/auth";
+import { pageUser } from "@/lib/auth";
 import { listCustomerBookings } from "@/lib/repo";
 import { formatDay, money } from "@/lib/format";
 
@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "My bookings" };
 
 export default async function BookingsPage() {
-  const user = await currentUser();
+  const user = await pageUser();
   const bookings = await listCustomerBookings(user.id);
 
   return (

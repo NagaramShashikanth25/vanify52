@@ -4,7 +4,7 @@ import SiteFooter from "@/components/SiteFooter";
 import StatusPill from "@/components/StatusPill";
 import OnlineToggle from "@/components/OnlineToggle";
 import JobActions from "@/components/JobActions";
-import { currentUser } from "@/lib/auth";
+import { pageUser } from "@/lib/auth";
 import { activePartnerJob, listCategories, openJobsFor, partnerEarnings } from "@/lib/repo";
 import { formatDay, money, timeAgo } from "@/lib/format";
 import { COMMISSION, FREE_JOBS } from "@/lib/config";
@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "My jobs" };
 
 export default async function PartnerDashboard() {
-  const user = await currentUser();
+  const user = await pageUser("PARTNER", "ADMIN");
   const partner = user.partner;
 
   if (!partner) {

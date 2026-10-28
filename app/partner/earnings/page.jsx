@@ -1,6 +1,6 @@
 import PartnerHeader from "@/components/PartnerHeader";
 import SiteFooter from "@/components/SiteFooter";
-import { currentUser } from "@/lib/auth";
+import { pageUser } from "@/lib/auth";
 import { partnerEarnings } from "@/lib/repo";
 import { formatDay, money } from "@/lib/format";
 import { COMMISSION, FREE_JOBS } from "@/lib/config";
@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata = { title: "Earnings" };
 
 export default async function EarningsPage() {
-  const user = await currentUser();
+  const user = await pageUser("PARTNER", "ADMIN");
   const partner = user.partner;
   if (!partner) return null;
   const { rows, gross, commission, net } = await partnerEarnings(partner.id);

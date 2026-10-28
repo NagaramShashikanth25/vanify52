@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
-
-const secret = () => new TextEncoder().encode(process.env.AUTH_SECRET || "dev-secret-change-me");
+import { authSecret as secret } from "./lib/secret";
 
 // Route guards (this file was called middleware.js before Next 16).
 // Everything not listed here is public.

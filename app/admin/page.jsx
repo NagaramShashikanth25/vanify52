@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { pageUser } from "@/lib/auth";
 import StatusPill from "@/components/StatusPill";
 import ResolveIssue from "@/components/ResolveIssue";
 import { listIssues, opsStats } from "@/lib/repo";
@@ -8,6 +9,7 @@ import { COMMISSION } from "@/lib/config";
 export const dynamic = "force-dynamic";
 
 export default async function AdminOverview() {
+  await pageUser("ADMIN");
   const s = await opsStats();
   const issues = await listIssues();
 
