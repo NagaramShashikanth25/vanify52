@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { authUrl, googleEnabled, redirectUri } from "@/lib/google";
-import { safeNext } from "@/lib/safe";
+import { publicOrigin, safeNext } from "@/lib/safe";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(req) {
   if (!googleEnabled()) {
-    return NextResponse.redirect(new URL("/login?error=google_not_configured", req.nextUrl.origin));
+    return NextResponse.redirect(new URL("/login?error=google_not_configured", publicOrigin(req)));
   }
 
   // Random state, stored in a short-lived cookie, checked on the way back (CSRF).

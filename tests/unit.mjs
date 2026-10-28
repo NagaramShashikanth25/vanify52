@@ -51,7 +51,11 @@ await test("Google: the callback uses the domain the visitor is on, not the per-
   try {
     delete process.env.APP_URL; delete process.env.GOOGLE_REDIRECT_URI;
     process.env.VERCEL_URL = "vanify-git-abc123-dinesh.vercel.app";
-    const req = { nextUrl: { origin: "https://vanify.vercel.app" } };
+    // What Vercel sends, versus what `next start` reports as its own origin.
+    const req = {
+      headers: new Headers({ host: "vanify.vercel.app", "x-forwarded-proto": "https" }),
+      nextUrl: { origin: "http://localhost:3000" },
+    };
     eq(google.redirectUri(req), "https://vanify.vercel.app/api/auth/google/callback", "redirect uri");
     process.env.APP_URL = "https://vanify.in/";
     eq(google.redirectUri(req), "https://vanify.in/api/auth/google/callback", "APP_URL wins");

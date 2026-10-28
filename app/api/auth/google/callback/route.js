@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { exchangeCode, redirectUri, verifyIdToken } from "@/lib/google";
+import { exchangeCode, redirectUri, resolveGoogleUser, verifyIdToken } from "@/lib/google";
 import { signSession, setSessionCookie } from "@/lib/auth";
-import { createUser, findUserByEmail, findUserByGoogleId, getPartnerByUser, linkGoogle } from "@/lib/repo";
-import { safeNext } from "@/lib/safe";
+import { getPartnerByUser } from "@/lib/repo";
+import { publicOrigin, safeNext } from "@/lib/safe";
 
 export const dynamic = "force-dynamic";
 
 const fail = (req, reason) =>
-  NextResponse.redirect(new URL(`/login?error=${reason}`, req.nextUrl.origin));
+  NextResponse.redirect(new URL(`/login?error=${reason}`, publicOrigin(req)));
 
 export async function GET(req) {
   const params = req.nextUrl.searchParams;
@@ -33,21 +33,10 @@ export async function GET(req) {
     return fail(req, "google_failed");
   }
 
-  // Match on Google id first, then on a verified email so an existing
-  // password account is linked rather than duplicated.
-  let user = await findUserByGoogleId(profile.googleId);
-  if (!user) {
-    const byEmail = await findUserByEmail(profile.email);
-    if (byEmail) {
-      await linkGoogle(byEmail.id, { googleId: profile.googleId, avatar: profile.avatar });
-      user = { ...byEmail, google_id: profile.googleId };
-    } else {
-      user = await createUser({
-        name: profile.name, email: profile.email, googleId: profile.googleId,
-        avatar: profile.avatar, role: "CUSTOMER",
-      });
-    }
-  }
+  // Never attaches Google to a password account by email — see resolveGoogleUser.
+  const found = await resolveGoogleUser(profile);
+  if (found.error) return fail(req, found.error);
+  const user = found.user;
 
   await setSessionCookie(await signSession(user));
 
@@ -55,7 +44,7 @@ export async function GET(req) {
   if (!user.phone) {
     const safe = safeNext(intent.next, "");
     const next = safe ? `?next=${encodeURIComponent(safe)}` : "";
-    return NextResponse.redirect(new URL(`/onboarding${next}`, req.nextUrl.origin));
+    return NextResponse.redirect(new URL(`/onboarding${next}`, publicOrigin(req)));
   }
 
   let dest = safeNext(intent.next, "");
@@ -64,5 +53,5 @@ export async function GET(req) {
     if (user.role === "ADMIN") dest = "/admin";
     if (user.role === "PARTNER") dest = (await getPartnerByUser(user.id)) ? "/partner/dashboard" : "/partner/register";
   }
-  return NextResponse.redirect(new URL(dest, req.nextUrl.origin));
+  return NextResponse.redirect(new URL(dest, publicOrigin(req)));
 }
