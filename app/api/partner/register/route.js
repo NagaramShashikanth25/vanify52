@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
-import { createUser, createPartner, findUserByPhone, getPartnerByUser } from "@/lib/repo";
+import { createUser, createPartner, findUserByPhone, getPartnerByUser, listCategories, setUserRole } from "@/lib/repo";
 import { hashPassword, signSession, setSessionCookie, currentUser } from "@/lib/auth";
 import { ZONES } from "@/lib/config";
 import { sameOrigin } from "@/lib/safe";
-import { listCategories } from "@/lib/repo";
 
 const bad = (msg, field) => NextResponse.json({ error: msg, field }, { status: 400 });
 
@@ -21,8 +20,14 @@ export async function POST(req) {
   // An existing signed-in user can upgrade to a partner account.
   const signedIn = await currentUser();
   if (signedIn) {
+    if (signedIn.role === "ADMIN") return bad("Staff accounts cannot take jobs. Register with a separate number.", "phone");
+    if (!signedIn.phone) return bad("Add your mobile number first — customers call it once you accept a job.", "phone");
     if (await getPartnerByUser(signedIn.id)) return bad("You already have a professional profile.", "phone");
     await createPartner(signedIn.id, { skills: cleanSkills, zones: cleanZones });
+    // The role decides which pages open (proxy.js) and is carried in the session,
+    // so update both — otherwise the new partner is bounced off the dashboard.
+    await setUserRole(signedIn.id, "PARTNER");
+    await setSessionCookie(await signSession({ ...signedIn, role: "PARTNER" }));
     return NextResponse.json({ ok: true, next: "/partner/dashboard" });
   }
 
