@@ -6,6 +6,7 @@ import LoginForm from "@/components/LoginForm";
 import GoogleButton from "@/components/GoogleButton";
 import AuthError from "@/components/AuthError";
 import { googleEnabled } from "@/lib/google";
+import { showDemoLogins } from "@/lib/demo";
 
 export const metadata = { title: "Sign in" };
 
@@ -36,12 +37,14 @@ export default async function LoginPage({ searchParams }) {
             New here? <Link href="/register">Create a customer account</Link> or{" "}
             <Link href="/partner/register">register as a professional</Link>.
           </p>
-          <div className="notice mt24">
-            <strong>Demo accounts</strong> — password <code>password123</code> for all three.
-            <div className="xs mt8">
-              Customer 9999900000 · Professional 9876500001 (Ramesh, electrical) · Staff 9000000000
+          {showDemoLogins() && (
+            <div className="notice mt24">
+              <strong>Demo accounts</strong> — password <code>password123</code> for all three.
+              <div className="xs mt8">
+                Customer 9999900000 · Professional 9876500001 (Ramesh, electrical) · Staff 9000000000
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </main>
       <SiteFooter />

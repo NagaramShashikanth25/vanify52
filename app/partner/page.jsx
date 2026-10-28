@@ -5,6 +5,7 @@ import { Check } from "@/components/Icons";
 import { COMMISSION, FREE_JOBS } from "@/lib/config";
 import GoogleButton from "@/components/GoogleButton";
 import { googleEnabled } from "@/lib/google";
+import { showDemoLogins } from "@/lib/demo";
 
 export const metadata = { title: "Become a professional" };
 
@@ -52,9 +53,11 @@ export default function PartnerLanding() {
                   <GoogleButton next="/partner/register" label="Continue with Google" />
                 </>
               )}
-              <p className="xs muted mt24">
-                Demo login: 9876500001 / password123 (Ramesh — electrical, Kukatpally and Miyapur).
-              </p>
+              {showDemoLogins() && (
+                <p className="xs muted mt24">
+                  Demo login: 9876500001 / password123 (Ramesh — electrical, Kukatpally and Miyapur).
+                </p>
+              )}
             </div>
           </div>
         </div>

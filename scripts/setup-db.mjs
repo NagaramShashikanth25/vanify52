@@ -5,6 +5,8 @@
  *   DATABASE_URL=postgres://… npm run setup → your Neon / Vercel Postgres database
  *
  * Pass --force to drop the existing tables first.
+ * Against DATABASE_URL only the service catalogue is loaded — no demo accounts —
+ * unless you add --demo. Create your real staff login with `npm run create-admin`.
  */
 import bcrypt from "bcryptjs";
 import fs from "node:fs";
@@ -14,6 +16,21 @@ import { fileURLToPath } from "node:url";
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
 const force = process.argv.includes("--force");
 const URL_ = process.env.DATABASE_URL;
+// Demo logins share one known password, so they are only created on your own
+// machine (PGlite), or against a hosted database when you pass --demo on purpose.
+const seedDemo = !URL_ || process.argv.includes("--demo");
+
+// --force drops every table. On a hosted database that is your live data, so it
+// needs a second, deliberate flag.
+const hosted = URL_ && !/localhost|127\.0\.0\.1/.test(URL_);
+if (force && hosted && !process.argv.includes("--yes-drop-hosted-data")) {
+  console.error(`
+  Refusing to drop tables on the hosted database in DATABASE_URL.
+  That would delete every booking and account. If you really mean it, add:
+    --yes-drop-hosted-data
+`);
+  process.exit(1);
+}
 
 function sslSetting(url) {
   if (/localhost|127\.0\.0\.1/.test(url)) return false;
@@ -151,6 +168,16 @@ for (const [cat, name, detail, price, minutes] of SERVICES) {
   serviceIds[name] = id;
   await db.q("INSERT INTO services (id,category_id,name,detail,price,minutes) VALUES ($1,$2,$3,$4,$5,$6)",
     [id, cat, name, detail, price, minutes]);
+}
+
+if (!seedDemo) {
+  await db.close();
+  console.log(`Ready — tables and the service catalogue are in place. No demo accounts were created.
+
+  Next, create your staff login:
+    DATABASE_URL="…" npm run create-admin
+`);
+  process.exit(0);
 }
 
 const pw = bcrypt.hashSync("password123", 10);
