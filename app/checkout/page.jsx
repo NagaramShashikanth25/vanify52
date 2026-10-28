@@ -7,6 +7,7 @@ import SiteFooterClient from "@/components/SiteFooterClient";
 import { useCart } from "@/components/CartProvider";
 import { BOOKING_DAYS, PLATFORM_FEE, SLOTS, ZONES } from "@/lib/config";
 import { money, nextDays, slotStarted } from "@/lib/format";
+import MixedTradeNotice, { cartTrades } from "@/components/MixedTradeNotice";
 
 const DAYS = nextDays(BOOKING_DAYS);
 const TODAY = DAYS[0].key;
@@ -21,6 +22,7 @@ export default function CheckoutPage() {
 
   const [me, setMe] = useState(undefined);
   const [catalogue, setCatalogue] = useState(null);
+  const [categories, setCategories] = useState([]);
   const [day, setDayRaw] = useState(FIRST_DAY);
   const [slot, setSlot] = useState(FIRST_SLOT);
   const closed = (s) => day === TODAY && slotStarted(s);
@@ -41,11 +43,12 @@ export default function CheckoutPage() {
       const a = d.addresses?.[0];
       if (a) { setAddress(a.line); setZone(a.zone); }
     });
-    fetch("/api/services").then((r) => r.json()).then((d) => setCatalogue(d.services));
+    fetch("/api/services").then((r) => r.json()).then((d) => { setCatalogue(d.services); setCategories(d.categories || []); });
   }, [router]);
 
   const lines = (catalogue || []).filter((s) => items[s.id] > 0).map((s) => ({ ...s, q: items[s.id] }));
   const total = lines.reduce((sum, l) => sum + l.price * l.q, 0);
+  const mixed = cartTrades(lines, categories).length > 1;
 
   async function place() {
     setError(null);
@@ -148,9 +151,10 @@ export default function CheckoutPage() {
             </div>
           </div>
 
+          <MixedTradeNotice lines={lines} categories={categories} />
           {error && <div className="notice error mt16">{error}</div>}
 
-          <button className="btn hivis full mt24" onClick={place} disabled={busy || closed(slot)}>
+          <button className="btn hivis full mt24" onClick={place} disabled={busy || closed(slot) || mixed}>
             {busy ? "Sending to professionals…" : "Confirm booking"}
           </button>
           <p className="xs muted mt8 center">Cash or UPI, after the job is done.</p>

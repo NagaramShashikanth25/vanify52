@@ -6,17 +6,21 @@ import HeaderClient from "@/components/HeaderClient";
 import { useCart } from "@/components/CartProvider";
 import { PLATFORM_FEE } from "@/lib/config";
 import { money } from "@/lib/format";
+import MixedTradeNotice, { cartTrades } from "@/components/MixedTradeNotice";
 
 export default function CartPage() {
   const { items, qty, add, remove, count } = useCart();
   const [catalogue, setCatalogue] = useState(null);
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    fetch("/api/services").then((r) => r.json()).then((d) => setCatalogue(d.services)).catch(() => setCatalogue([]));
+    fetch("/api/services").then((r) => r.json()).then((d) => { setCatalogue(d.services); setCategories(d.categories || []); })
+      .catch(() => setCatalogue([]));
   }, []);
 
   const lines = (catalogue || []).filter((s) => items[s.id] > 0).map((s) => ({ ...s, q: items[s.id] }));
   const total = lines.reduce((sum, l) => sum + l.price * l.q, 0);
+  const mixed = cartTrades(lines, categories).length > 1;
 
   return (
     <>
@@ -67,7 +71,9 @@ export default function CartPage() {
                 <p className="xs muted mt8">Nothing is charged now. Pay by cash or UPI once the job is finished.</p>
               </div>
 
-              <Link className="btn hivis full mt24" href="/checkout">Choose a slot</Link>
+              <MixedTradeNotice lines={lines} categories={categories} />
+
+              <Link className="btn hivis full mt24" href="/checkout" aria-disabled={mixed}>Choose a slot</Link>
             </>
           )}
         </div>
