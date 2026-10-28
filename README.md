@@ -19,11 +19,11 @@ released after they accept it.
 
 ## 1. Running it on your machine
 
-Needs **Node 20.9 or newer** (Next 16's floor; Node 22 is a safe choice). Nothing else to
-install — no database server, no Docker.
+Needs **Node 22** (the version this code is tested on, and the one pinned for Vercel).
+Nothing else to install — no database server, no Docker.
 
 ```bash
-node -v      # must print v20.9 or higher
+node -v      # should print v22.x
 ```
 
 ```bash
@@ -39,7 +39,11 @@ whatever is missing.
 With `DATABASE_URL` unset, the app runs on **PGlite** — real Postgres compiled to
 WebAssembly, stored in `db/local/`. It is the same SQL production runs.
 
-### Demo accounts — password `password123`
+### Demo accounts — password `password123` (local only)
+
+These are created on your machine. They are **not** created on a hosted database unless you
+ask for them with `--demo`, and the sign-in page only lists them in development or when
+the deployment sets `DEMO_MODE=1`.
 
 | Role | Mobile |
 |---|---|
@@ -77,9 +81,14 @@ database ever refuses to open after a crash.
 SQLite could not come along — Vercel's filesystem is read-only and every request may land
 on a different instance. The app runs on Postgres there.
 
-**Step 1 — create the database.** Vercel dashboard → *Storage* → *Create* → **Neon
-Postgres**. Vercel sets `DATABASE_URL` for you. With an outside provider (Supabase,
-Railway, Neon direct), copy the **pooled** connection string in yourself.
+**Step 1 — create the database in Singapore.** Vercel dashboard → *Storage* → *Create* →
+**Neon Postgres**, region **AWS Asia Pacific (Singapore)**. Vercel sets `DATABASE_URL` for
+you. With an outside provider, copy the **pooled** connection string in yourself.
+
+`vercel.json` runs the app's functions in Singapore (`sin1`) so they sit next to the
+database. Neon has no Mumbai region; Singapore is the closest to Hyderabad. If you pick
+another database region, change `regions` in `vercel.json` to match — a function far
+from its database pays the distance on every query.
 
 **Step 2 — set the variables** under *Settings → Environment Variables*:
 
@@ -87,13 +96,18 @@ Railway, Neon direct), copy the **pooled** connection string in yourself.
 |---|---|---|
 | `AUTH_SECRET` | yes | `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"` |
 | `DATABASE_URL` | yes | The pooled connection string |
-| `APP_URL` | only on a custom domain | e.g. `https://vanify.in` |
+| `APP_URL` | recommended | Your public address, e.g. `https://vanify.in` or `https://vanify.vercel.app` |
+| `DEMO_MODE` | no | `1` only on a demo deployment that should list the demo logins |
 
-**Step 3 — create the tables.** Once, from your machine:
+**Step 3 — create the tables and your staff login.** Once, from your machine:
 
 ```bash
-DATABASE_URL="postgres://…" npm run setup
+DATABASE_URL="postgres://…" npm run setup          # tables + service catalogue, no demo accounts
+DATABASE_URL="postgres://…" npm run create-admin   # asks for number, name, password (hidden)
 ```
+
+`npm run db:reset` refuses to drop a hosted database unless you add
+`--yes-drop-hosted-data`, so a stray `DATABASE_URL` in your terminal cannot wipe it.
 
 **Step 4 — push the repo and import it on Vercel.** It detects Next.js; no build settings
 to change.
@@ -108,14 +122,15 @@ you can read beats a deployed site that 500s.
 
 Local builds are never blocked by that check.
 
-**Before real traffic**, delete the demo accounts — they ship with a known password:
+If you ever seeded a hosted database with `--demo`, delete those accounts before real
+traffic — they share a known password:
 
 ```sql
 DELETE FROM users WHERE phone IN
   ('9999900000','9876500001','9876500002','9876500003','9876500004','9876500005','9000000000');
 ```
 
-Then create your own admin (insert a row with `role = 'ADMIN'` and a bcrypt hash).
+Then run `npm run create-admin` for your own staff login.
 
 ---
 
@@ -136,10 +151,19 @@ When you are ready:
    ```
 3. Add the two variables in Vercel and redeploy. The buttons appear by themselves.
 
+Set `APP_URL` to your public address as well; the callback is built from it (or, if
+unset, from the address the visitor is on). Google sign-in only works on addresses you
+registered, so it will not work on Vercel preview URLs — that is expected.
+
 Only `openid`, `email` and `profile` are requested, so Google does not require app
 verification. A Google account carries no phone number, so a new Google user is sent to
-`/onboarding` to add one before they can book. If someone signed up with a password and
-later uses Google with the same email, the accounts are **linked**, not duplicated.
+`/onboarding` to add one before they can book.
+
+A Google sign-in is **never attached to an existing password account just because the
+emails match.** Sign-up emails are not verified, so automatic linking would let someone
+register with another person's email and later receive that person's Google sign-in. That
+person is told to sign in with their mobile number instead. A safe "Connect Google" button
+inside a signed-in account can be added later.
 
 ---
 
@@ -156,8 +180,8 @@ What is enforced in the code:
 - **Sessions** are signed JWTs in an httpOnly, SameSite=Lax, Secure cookie. In production
   the app refuses to start with a missing or placeholder `AUTH_SECRET`, because a known
   secret lets anyone forge an admin session.
-- **Role checks twice**: `middleware.js` blocks a protected route before the page renders,
-  and every API route re-checks the role server-side. Ownership is checked per record —
+- **Role checks twice**: `proxy.js` blocks a protected route before the page renders, and
+  every API route and private page re-checks the role server-side. Ownership is checked per record —
   a booking only opens for its own customer, a job action only for its assigned professional.
 - **Prices come from the database**, never from the browser, so editing the cart in
   devtools cannot change what is charged.
@@ -189,6 +213,22 @@ What is still open, and should be closed before money moves:
 6. **No audit log** of admin actions.
 
 ---
+
+## Tests
+
+```bash
+npm run test:unit                       # dates, redirects, Google rules
+# end-to-end, against a THROWAWAY local Postgres (the suite rebuilds it):
+npm run build
+DATABASE_URL=postgres://…@localhost/… npx next start -p 3100 &
+DATABASE_URL=postgres://…@localhost/… QUERY_LOG=/path/to/postgres.log npm run test:e2e
+```
+
+The end-to-end suite refuses any non-local `DATABASE_URL`. `QUERY_LOG` (a Postgres log
+with `log_statement = 'all'`) is only needed for the two query-count checks.
+
+Every job status change is a single conditional `UPDATE` naming the statuses it may start
+from, so a cancelled or finished job can never be pushed backwards or completed twice.
 
 ## How it is built
 
