@@ -11,7 +11,9 @@
     "build": "node scripts/check-env.mjs && next build",
     "start": "next start",
     "db:reset": "node scripts/setup-db.mjs --force",
-    "doctor": "node scripts/doctor.mjs"
+    "doctor": "node scripts/doctor.mjs",
+    "test:unit": "node --import ./tests/register.mjs tests/unit.mjs",
+    "test:e2e": "node tests/e2e.mjs"
   },
   "dependencies": {
     "bcryptjs": "2.4.3",
