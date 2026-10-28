@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { currentUser } from "@/lib/auth";
 import { createBooking, getServices, saveAddress } from "@/lib/repo";
-import { SLOTS, ZONES } from "@/lib/config";
+import { BOOKING_DAYS, SLOTS, ZONES } from "@/lib/config";
+import { nextDays, slotStarted } from "@/lib/format";
 import { sameOrigin } from "@/lib/safe";
 import { clientIp, throttle } from "@/lib/guard";
 
@@ -25,7 +26,11 @@ export async function POST(req) {
   if (!ZONES.includes(zone)) return bad("Choose a service area.", "zone");
   if (!address || address.trim().length < 6) return bad("Add the flat and building so the professional can find you.", "address");
   if (!SLOTS.includes(slot)) return bad("Pick a time slot.", "slot");
-  if (!day) return bad("Pick a day.", "day");
+  // A real date in the bookable window — never a word like "Today", which would
+  // mean a different day by tomorrow.
+  const days = nextDays(BOOKING_DAYS).map((d) => d.key);
+  if (!days.includes(day)) return bad("Pick a day in the next week.", "day");
+  if (day === days[0] && slotStarted(slot)) return bad("That slot has already started today. Pick a later one.", "slot");
 
   // Prices always come from the database — never from the browser.
   const services = await getServices(ids);

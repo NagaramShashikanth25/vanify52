@@ -6,7 +6,7 @@ import OnlineToggle from "@/components/OnlineToggle";
 import JobActions from "@/components/JobActions";
 import { currentUser } from "@/lib/auth";
 import { activePartnerJob, listCategories, openJobsFor, partnerEarnings } from "@/lib/repo";
-import { money, timeAgo } from "@/lib/format";
+import { formatDay, money, timeAgo } from "@/lib/format";
 import { COMMISSION, FREE_JOBS } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
@@ -101,7 +101,7 @@ export default async function PartnerDashboard() {
                 <StatusPill status={active.status} />
               </div>
               <p className="mt8"><strong>{active.items.map((i) => `${i.name} × ${i.qty}`).join(", ")}</strong></p>
-              <p className="sm muted">{active.day}, {active.slot}</p>
+              <p className="sm muted">{formatDay(active.day)}, {active.slot}</p>
 
               <div className="card mt16" style={{ background: "var(--paper)" }}>
                 <p className="sm">
@@ -153,7 +153,7 @@ export default async function PartnerDashboard() {
                   <strong>{b.items.map((i) => `${i.name} × ${i.qty}`).join(", ")}</strong>
                   <span className="pill amber">{timeAgo(b.created_at)}</span>
                 </div>
-                <p className="sm muted mt8">{b.zone} · {b.day}, {b.slot}</p>
+                <p className="sm muted mt8">{b.zone} · {formatDay(b.day)}, {b.slot}</p>
                 <p className="xs muted mt8">
                   The full address and the customer&apos;s number are shared once you accept.
                 </p>

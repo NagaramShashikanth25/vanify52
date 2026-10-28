@@ -7,7 +7,7 @@ import BookingActions from "@/components/BookingActions";
 import { Verified } from "@/components/Icons";
 import { currentUser } from "@/lib/auth";
 import { getBooking } from "@/lib/repo";
-import { initials, money } from "@/lib/format";
+import { formatDay, initials, money } from "@/lib/format";
 import { STATUS_FLOW } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
@@ -39,7 +39,7 @@ export default async function BookingDetail({ params }) {
             <h1 style={{ fontSize: "1.8rem" }}>{booking.items.map((i) => i.name).join(", ")}</h1>
             <StatusPill status={booking.status} />
           </div>
-          <p className="muted mt8">{booking.ref} · {booking.day}, {booking.slot}</p>
+          <p className="muted mt8">{booking.ref} · {formatDay(booking.day)}, {booking.slot}</p>
 
           {pro ? (
             <div className="card mt24">

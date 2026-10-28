@@ -5,10 +5,15 @@ import Link from "next/link";
 import HeaderClient from "@/components/HeaderClient";
 import SiteFooterClient from "@/components/SiteFooterClient";
 import { useCart } from "@/components/CartProvider";
-import { PLATFORM_FEE, SLOTS, ZONES } from "@/lib/config";
-import { money, nextDays } from "@/lib/format";
+import { BOOKING_DAYS, PLATFORM_FEE, SLOTS, ZONES } from "@/lib/config";
+import { money, nextDays, slotStarted } from "@/lib/format";
 
-const DAYS = nextDays(7);
+const DAYS = nextDays(BOOKING_DAYS);
+const TODAY = DAYS[0].key;
+// After the last slot has begun, today has nothing left, so start on tomorrow.
+const OPEN_TODAY = SLOTS.find((s) => !slotStarted(s));
+const FIRST_DAY = OPEN_TODAY ? TODAY : DAYS[1].key;
+const FIRST_SLOT = FIRST_DAY === TODAY && slotStarted(SLOTS[3]) ? OPEN_TODAY : SLOTS[3];
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -16,8 +21,13 @@ export default function CheckoutPage() {
 
   const [me, setMe] = useState(undefined);
   const [catalogue, setCatalogue] = useState(null);
-  const [day, setDay] = useState(DAYS[0].label);
-  const [slot, setSlot] = useState(SLOTS[3]);
+  const [day, setDayRaw] = useState(FIRST_DAY);
+  const [slot, setSlot] = useState(FIRST_SLOT);
+  const closed = (s) => day === TODAY && slotStarted(s);
+  const setDay = (key) => {
+    setDayRaw(key);
+    if (key === TODAY && slotStarted(slot) && OPEN_TODAY) setSlot(OPEN_TODAY);
+  };
   const [zone, setZone] = useState(ZONES[0]);
   const [address, setAddress] = useState("");
   const [note, setNote] = useState("");
@@ -88,7 +98,8 @@ export default function CheckoutPage() {
             <h4>Pick a day</h4>
             <div className="dayrow mt16">
               {DAYS.map((d) => (
-                <button key={d.key} className="choice" aria-pressed={day === d.label} onClick={() => setDay(d.label)}>
+                <button key={d.key} className="choice" aria-pressed={day === d.key}
+                  disabled={d.key === TODAY && !OPEN_TODAY} onClick={() => setDay(d.key)}>
                   <strong>{d.num}</strong>{d.label}
                 </button>
               ))}
@@ -97,7 +108,8 @@ export default function CheckoutPage() {
             <h4 className="mt24">Pick a time</h4>
             <div className="choices mt16">
               {SLOTS.map((s) => (
-                <button key={s} className="choice" aria-pressed={slot === s} onClick={() => setSlot(s)}>{s}</button>
+                <button key={s} className="choice" aria-pressed={slot === s} disabled={closed(s)}
+                  onClick={() => setSlot(s)}>{s}</button>
               ))}
             </div>
           </div>
@@ -138,7 +150,7 @@ export default function CheckoutPage() {
 
           {error && <div className="notice error mt16">{error}</div>}
 
-          <button className="btn hivis full mt24" onClick={place} disabled={busy}>
+          <button className="btn hivis full mt24" onClick={place} disabled={busy || closed(slot)}>
             {busy ? "Sending to professionals…" : "Confirm booking"}
           </button>
           <p className="xs muted mt8 center">Cash or UPI, after the job is done.</p>

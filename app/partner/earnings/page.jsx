@@ -2,7 +2,7 @@ import PartnerHeader from "@/components/PartnerHeader";
 import SiteFooter from "@/components/SiteFooter";
 import { currentUser } from "@/lib/auth";
 import { partnerEarnings } from "@/lib/repo";
-import { money } from "@/lib/format";
+import { formatDay, money } from "@/lib/format";
 import { COMMISSION, FREE_JOBS } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
@@ -41,7 +41,7 @@ export default async function EarningsPage() {
                       <strong>{b.ref}</strong>
                       <div className="xs muted">{b.items.map((i) => i.name).join(", ")}</div>
                     </td>
-                    <td>{b.day}</td>
+                    <td>{formatDay(b.day)}</td>
                     <td>{money(b.items_total)}</td>
                     <td>{b.commission ? `–${money(b.commission)}` : <span className="muted">free job</span>}</td>
                     <td><strong>{money(b.items_total - b.commission)}</strong></td>

@@ -1,6 +1,6 @@
 import StatusPill from "@/components/StatusPill";
 import { listAllBookings } from "@/lib/repo";
-import { money } from "@/lib/format";
+import { formatDay, money } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +29,7 @@ export default async function AdminBookings() {
                   {b.items.map((i) => `${i.name} ×${i.qty}`).join(", ")}
                   <div className="xs muted">{b.zone}</div>
                 </td>
-                <td>{b.day}<div className="xs muted">{b.slot}</div></td>
+                <td>{formatDay(b.day)}<div className="xs muted">{b.slot}</div></td>
                 <td>{b.partner_name || <span className="muted">—</span>}</td>
                 <td>{money(b.items_total)}</td>
                 <td>{b.status === "COMPLETED" ? money(b.commission) : <span className="muted">—</span>}</td>

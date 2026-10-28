@@ -4,7 +4,7 @@ import SiteFooter from "@/components/SiteFooter";
 import StatusPill from "@/components/StatusPill";
 import { currentUser } from "@/lib/auth";
 import { listCustomerBookings } from "@/lib/repo";
-import { money } from "@/lib/format";
+import { formatDay, money } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "My bookings" };
@@ -34,7 +34,7 @@ export default async function BookingsPage() {
                 <strong>{b.items.map((i) => i.name).join(", ")}</strong>
                 <StatusPill status={b.status} />
               </div>
-              <p className="sm muted mt8">{b.ref} · {b.day}, {b.slot} · {b.zone}</p>
+              <p className="sm muted mt8">{b.ref} · {formatDay(b.day)}, {b.slot} · {b.zone}</p>
               <p className="sm mt8">
                 <strong className="price">{money(b.items_total + b.fee)}</strong>{" "}
                 {b.status === "COMPLETED" ? "paid" : b.status === "CANCELLED" ? "— cancelled" : "payable after the service"}

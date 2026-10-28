@@ -111,6 +111,10 @@ const PARTNERS = [
 import { randomUUID } from "node:crypto";
 const uid = (p) => p + randomUUID().replace(/-/g, "").slice(0, 18);
 
+// Bookings store a plain date in India time ("2026-10-29"), same as lib/format.js.
+const istDate = (offsetDays = 0) =>
+  new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Kolkata" }).format(new Date(Date.now() + offsetDays * 86400000));
+
 // Generate a signing secret on first run so nobody has to remember to.
 const envFile = path.join(root, ".env.local");
 if (!fs.existsSync(envFile)) {
@@ -177,7 +181,7 @@ await db.q(
   `INSERT INTO bookings (id,ref,customer_id,partner_id,category_id,zone,address,day,slot,items_total,fee,status,otp,commission,rating,paid_at)
    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15, now())`,
   [b1, "VN730114", customerId, partnerIds["Sunitha Bai"], "cleaning", "Madhapur",
-   "Flat 402, Sai Residency, Road No. 4", "Yesterday", "11:00 AM – 12:00 PM", 1098, 19, "COMPLETED", "4417", 132, 5]);
+   "Flat 402, Sai Residency, Road No. 4", istDate(-1), "10:00 AM – 11:00 AM", 1098, 19, "COMPLETED", "4417", 132, 5]);
 await db.q("INSERT INTO booking_items (id,booking_id,service_id,name,price,qty) VALUES ($1,$2,$3,$4,$5,$6)",
   [uid("bi_"), b1, serviceIds["Bathroom deep clean"], "Bathroom deep clean", 549, 2]);
 for (const label of ["Booking placed", "Sunitha Bai accepted the job", "Job completed"]) {
@@ -190,7 +194,7 @@ await db.q(
   `INSERT INTO bookings (id,ref,customer_id,category_id,zone,address,day,slot,items_total,fee,status,otp)
    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
   [b2, "VN730118", customerId, "electrical", "Miyapur", "H.No 7-2-19, Bhagyanagar Colony",
-   "Today", "4:00 PM – 5:00 PM", 597, 19, "SEARCHING", "8290"]);
+   istDate(1), "4:00 PM – 5:00 PM", 597, 19, "SEARCHING", "8290"]);
 await db.q("INSERT INTO booking_items (id,booking_id,service_id,name,price,qty) VALUES ($1,$2,$3,$4,$5,$6)",
   [uid("bi_"), b2, serviceIds["Fan repair or replacement"], "Fan repair or replacement", 199, 3]);
 await db.q("INSERT INTO booking_events (id,booking_id,label) VALUES ($1,$2,$3)", [uid("ev_"), b2, "Booking placed"]);
