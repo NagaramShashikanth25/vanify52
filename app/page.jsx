@@ -3,7 +3,7 @@ import SiteHeader from "@/components/SiteHeader";
 import SiteFooter from "@/components/SiteFooter";
 import ServiceSearch from "@/components/ServiceSearch";
 import { CategoryIcon, Verified } from "@/components/Icons";
-import { categoryMinPrice, listApprovedPartners, listCategories } from "@/lib/repo";
+import { categoryMinPrices, listApprovedPartners, listCategories } from "@/lib/repo";
 import { money, initials } from "@/lib/format";
 import { CITY, ZONES } from "@/lib/config";
 
@@ -24,13 +24,11 @@ const SAFETY = [
 ];
 
 export default async function HomePage() {
-  const categories = await listCategories();
-  const partners = (await listApprovedPartners()).slice(0, 5);
-
-  // One price lookup per category, resolved before render.
-  const minPrice = Object.fromEntries(
-    await Promise.all(categories.map(async (c) => [c.id, await categoryMinPrice(c.id)]))
-  );
+  // Three independent reads, sent together.
+  const [categories, approved, minPrice] = await Promise.all([
+    listCategories(), listApprovedPartners(), categoryMinPrices(),
+  ]);
+  const partners = approved.slice(0, 5);
 
   return (
     <>

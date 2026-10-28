@@ -103,3 +103,7 @@ CREATE INDEX IF NOT EXISTS idx_bookings_customer ON bookings(customer_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_partner  ON bookings(partner_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_status   ON bookings(status);
 CREATE INDEX IF NOT EXISTS idx_services_category ON services(category_id);
+-- Booking pages load items and events by booking; sign-in looks emails up case-insensitively.
+CREATE INDEX IF NOT EXISTS idx_items_booking     ON booking_items(booking_id);
+CREATE INDEX IF NOT EXISTS idx_events_booking    ON booking_events(booking_id);
+CREATE INDEX IF NOT EXISTS idx_users_email_lower ON users (lower(email));
