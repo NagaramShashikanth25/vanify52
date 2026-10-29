@@ -12,6 +12,7 @@ export default async function SiteHeader() {
       <div className="wrap bar">
         <Link href="/" className="brand"><Logo />Vanify</Link>
         <nav className="mainnav">
+          <Link href="/">Home</Link>
           <Link href="/services">Services</Link>
           <Link href="/help">Help</Link>
           {session?.role === "ADMIN" && <Link href="/admin">Ops</Link>}
