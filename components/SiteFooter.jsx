@@ -24,8 +24,8 @@ export default function SiteFooter() {
         </div>
         <div>
           <h4>Company</h4>
-          <a href="mailto:hello@vanify.in">hello@vanify.in</a>
-          <a href="tel:+919000000000">+91 90000 00000</a>
+          <a href="mailto:hello@vanify.in">shashikanthnagaram@gmail.com</a>
+          <a href="tel:+919000000000">+91 6302814114</a>
           <Link href="/admin">Staff login</Link>
         </div>
       </div>

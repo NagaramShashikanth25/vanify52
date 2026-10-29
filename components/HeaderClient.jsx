@@ -22,6 +22,7 @@ export default function HeaderClient() {
       <div className="wrap bar">
         <Link href="/" className="brand"><Logo />Vanify</Link>
         <nav className="mainnav">
+          <Link href="/">Home</Link>
           <Link href="/services">Services</Link>
           <Link href="/help">Help</Link>
           <CartLink />

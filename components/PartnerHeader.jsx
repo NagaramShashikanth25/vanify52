@@ -16,6 +16,7 @@ export default async function PartnerHeader() {
         <nav className="mainnav">
           {isPartner ? (
             <>
+              <Link href="/">Home</Link>
               <Link href="/partner/dashboard">Jobs</Link>
               <Link href="/partner/earnings">Earnings</Link>
               <Link href="/partner/profile">Profile</Link>
