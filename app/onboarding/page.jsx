@@ -3,6 +3,7 @@ import SiteFooter from "@/components/SiteFooter";
 import OnboardingForm from "@/components/OnboardingForm";
 import { currentUser } from "@/lib/auth";
 import { safeNext } from "@/lib/safe";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "One more thing" };
@@ -10,6 +11,8 @@ export const metadata = { title: "One more thing" };
 export default async function OnboardingPage({ searchParams }) {
   const sp = await searchParams;
   const user = await currentUser();
+  const next = safeNext(sp?.next, "/account/bookings");
+  if (user?.phone) redirect(next);
 
   return (
     <>
@@ -22,7 +25,7 @@ export default async function OnboardingPage({ searchParams }) {
             professional reaches you at the door, and how we send your booking updates.
           </p>
           <div className="panel mt24">
-            <OnboardingForm next={safeNext(sp?.next, "/account/bookings")} />
+            <OnboardingForm next={next} />
           </div>
           <p className="xs muted mt16">
             Signed in as {user?.email}. Your number is shared with one professional only after
