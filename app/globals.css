@@ -247,6 +247,25 @@ tbody tr:hover{background:#FAFBF9}
 .sitefoot a:hover{color:var(--hivis);text-decoration:none}
 .sitefoot h4{color:#fff;margin:0 0 13px;font-size:.85rem}
 .footgrid{display:flex;justify-content:space-between;gap:36px;flex-wrap:wrap}
+.legal-page{padding:42px 0 64px}
+.legal-back{font-size:.9rem;font-weight:600}
+.legal-heading{padding:26px 0 30px}
+.legal-eyebrow{color:var(--green);font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.legal-heading h1{margin-top:8px;font-size:clamp(2rem,4vw,2.7rem)}
+.legal-description{max-width:62ch;margin-top:12px;color:var(--muted)}
+.legal-updated{margin-top:18px;color:var(--muted);font-size:.84rem}
+.legal-toc{background:var(--green-wash);border:1px solid #BCD9C9;border-radius:var(--radius);padding:20px 24px}
+.legal-toc h2{font-size:1rem}
+.legal-toc ol{columns:2;column-gap:32px;margin:12px 0 0;padding-left:22px}
+.legal-toc li{break-inside:avoid;padding:3px 0;font-size:.9rem}
+.legal-content{margin-top:32px}
+.legal-section{padding:24px 0;border-bottom:1px solid var(--line);scroll-margin-top:90px}
+.legal-section h2{font-size:1.2rem;margin-bottom:12px}
+.legal-section p,.legal-section li{max-width:76ch;color:#39473E;font-size:.95rem}
+.legal-section p+p{margin-top:12px}
+.legal-section ul{padding-left:22px;margin:10px 0 0}
+.legal-section li+li{margin-top:8px}
+.legal-related{margin-top:24px;font-size:.92rem}
 details.faq{border-bottom:1px solid var(--line);padding:16px 0}
 details.faq summary{font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:16px}
 details.faq summary::-webkit-details-marker{display:none}
@@ -265,6 +284,10 @@ details.faq p{color:var(--muted);font-size:.94rem;margin-top:11px;max-width:72ch
 @media (max-width:640px){
   .g2,.g4{grid-template-columns:1fr}
   .section{padding:44px 0}
+  .legal-page{padding:30px 0 44px}
+  .legal-toc{padding:18px}
+  .legal-toc ol{columns:1}
+  .legal-section{padding:20px 0}
   .topbar .bar{height:60px;gap:14px}
   .mainnav{gap:13px}
   .searchbox{flex-direction:column}
