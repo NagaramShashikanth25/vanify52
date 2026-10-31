@@ -2,7 +2,7 @@ import Link from "next/link";
 import SiteFooter from "@/components/SiteFooter";
 import SiteHeader from "@/components/SiteHeader";
 
-export default function LegalPage({ title, description, sections, otherPolicyHref, otherPolicyLabel }) {
+export default function LegalPage({ title, description, sections, otherPolicyHref, otherPolicyLabel, relatedPolicies }) {
   return (
     <>
       <SiteHeader />
@@ -42,7 +42,13 @@ export default function LegalPage({ title, description, sections, otherPolicyHre
           </article>
 
           <p className="legal-related">
-            Also read <Link href={otherPolicyHref}>{otherPolicyLabel}</Link>.
+            Also read{" "}
+            {(relatedPolicies || [{ href: otherPolicyHref, label: otherPolicyLabel }]).map((policy, index) => (
+              <span key={policy.href}>
+                {index > 0 && " · "}
+                <Link href={policy.href}>{policy.label}</Link>
+              </span>
+            ))}
           </p>
         </div>
       </main>

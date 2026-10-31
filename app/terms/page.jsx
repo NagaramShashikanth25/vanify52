@@ -91,8 +91,10 @@ export default function TermsPage() {
       title="Terms and Conditions"
       description="Please read these terms before booking a service or using Vanify."
       sections={sections}
-      otherPolicyHref="/privacy"
-      otherPolicyLabel="Privacy Policy"
+      relatedPolicies={[
+        { href: "/privacy", label: "Privacy Policy" },
+        { href: "/cancellation-refunds", label: "Cancellation & Refund Policy" },
+      ]}
     />
   );
 }

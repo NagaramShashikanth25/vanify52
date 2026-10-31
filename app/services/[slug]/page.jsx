@@ -39,8 +39,14 @@ export default async function CategoryPage({ params }) {
                 <p className="muted mt4">{category.blurb}</p>
               </div>
             </div>
-            <span className="pill green">{pros.length} professional{pros.length === 1 ? "" : "s"} on duty</span>
+            <span className="pill green">{pros.length} approved professional{pros.length === 1 ? "" : "s"}</span>
           </div>
+
+          {!pros.length && (
+            <div className="notice mt24" role="status">
+              There are no approved professionals for this service yet. You can browse the catalogue, but booking requests may not be accepted until a professional is approved.
+            </div>
+          )}
 
           <div className="card mt24">
             {services.map((s) => (

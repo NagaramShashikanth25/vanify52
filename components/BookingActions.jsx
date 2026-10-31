@@ -68,7 +68,7 @@ export default function BookingActions({ id, status, rating }) {
         </div>
       )}
 
-      {sent && <div className="notice green mt16">Support has your report and will call you within an hour.</div>}
+      {sent && <div className="notice green mt16">Your report was sent. Visit Help &amp; FAQs if you need to contact Vanify about it.</div>}
       {error && <div className="notice error mt16">{error}</div>}
     </>
   );

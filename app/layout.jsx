@@ -2,9 +2,9 @@ import "./globals.css";
 import { CartProvider } from "@/components/CartProvider";
 
 export const metadata = {
-  title: { default: "Vanify — book verified home services", template: "%s · Vanify" },
+  title: { default: "Vanify — home services in Hyderabad", template: "%s · Vanify" },
   description:
-    "Vanify connects you to verified professionals for cleaning, electrical, plumbing, carpentry, moving and event help in Hyderabad. Fixed prices, pay after the work.",
+    "Explore home-service listings and labour prices in Hyderabad. See approved professional counts by service and the total before sending a booking request.",
 };
 
 export const viewport = { width: "device-width", initialScale: 1, themeColor: "#0F2118" };

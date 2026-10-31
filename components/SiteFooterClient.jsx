@@ -7,7 +7,7 @@ export default function SiteFooterClient() {
       <div className="wrap footgrid">
         <div style={{ maxWidth: 280 }}>
           <h4>Vanify</h4>
-          <p style={{ marginBottom: 10 }}>Verified professionals for home services, booked in a minute.</p>
+          <p style={{ marginBottom: 10 }}>Home-service listings and booking requests, with professional counts by service.</p>
           <p className="xs">A Vanify Express Pvt. Ltd. service · Hyderabad, Telangana</p>
         </div>
         <div>
@@ -27,6 +27,7 @@ export default function SiteFooterClient() {
           <a href="tel:+916302814114">+91 6302814114</a>
           <Link href="/terms">Terms and Conditions</Link>
           <Link href="/privacy">Privacy Policy</Link>
+          <Link href="/cancellation-refunds">Cancellation &amp; Refund Policy</Link>
         </div>
       </div>
     </footer>

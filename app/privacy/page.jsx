@@ -97,8 +97,10 @@ export default function PrivacyPage() {
       title="Privacy Policy"
       description="A clear explanation of the information Vanify uses to arrange and support your bookings."
       sections={sections}
-      otherPolicyHref="/terms"
-      otherPolicyLabel="Terms and Conditions"
+      relatedPolicies={[
+        { href: "/terms", label: "Terms and Conditions" },
+        { href: "/cancellation-refunds", label: "Cancellation & Refund Policy" },
+      ]}
     />
   );
 }

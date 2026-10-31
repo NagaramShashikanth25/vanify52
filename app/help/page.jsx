@@ -23,7 +23,7 @@ const FAQ_GROUPS = [
       ],
       [
         "Can I change or cancel a booking?",
-        "Contact us as early as possible with your booking reference. We will confirm what options are available; your booking is not changed or cancelled until you receive confirmation.",
+        "You can cancel from your booking page while it is still finding a professional or a professional has been assigned. Once the professional is on the way or work has started, contact us for help. See our Cancellation & Refund Policy for details.",
       ],
       [
         "Where can I see my booking details?",
@@ -50,7 +50,7 @@ const FAQ_GROUPS = [
       ],
       [
         "What if there is a problem with the service?",
-        "Contact us with your booking reference and a description of the issue. We will review the details and let you know the available next steps.",
+        "Use Report a problem on your booking page, or contact us with your booking reference and a description of the issue. We will review the details and let you know the available next steps.",
       ],
     ],
   },
@@ -141,6 +141,10 @@ export default function HelpPage() {
                 </Link>
                 <Link className="help-policy-link" href="/privacy">
                   <span><strong>Privacy Policy</strong><small>Information we collect and how it is used</small></span>
+                  <span aria-hidden="true">→</span>
+                </Link>
+                <Link className="help-policy-link" href="/cancellation-refunds">
+                  <span><strong>Cancellation &amp; Refund Policy</strong><small>Cancelling a booking and payment concerns</small></span>
                   <span aria-hidden="true">→</span>
                 </Link>
               </section>

@@ -56,7 +56,7 @@ export default async function BookingDetail({ params }) {
             <div className="card mt24">
               <strong>Finding someone near {booking.zone}</strong>
               <p className="sm muted mt8">
-                Most jobs are accepted within 10 minutes. We will call you if nobody is free.
+                Your request is waiting for a professional to accept. Check this page for status updates, or contact support through Help &amp; FAQs if you need assistance.
               </p>
             </div>
           ) : null}

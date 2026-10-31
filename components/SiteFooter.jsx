@@ -7,7 +7,7 @@ export default function SiteFooter() {
       <div className="wrap footgrid">
         <div style={{ maxWidth: 280 }}>
           <h4>Vanify</h4>
-          <p style={{ marginBottom: 10 }}>Verified professionals for home services, booked in a minute.</p>
+          <p style={{ marginBottom: 10 }}>Home-service listings and booking requests, with professional counts by service.</p>
           <p className="xs">A Vanify Express Pvt. Ltd. service · {CITY}, Telangana</p>
         </div>
         <div>
@@ -29,6 +29,7 @@ export default function SiteFooter() {
           <Link href="/admin">Staff login</Link>
           <Link href="/terms">Terms and Conditions</Link>
           <Link href="/privacy">Privacy Policy</Link>
+          <Link href="/cancellation-refunds">Cancellation &amp; Refund Policy</Link>
         </div>
       </div>
     </footer>
