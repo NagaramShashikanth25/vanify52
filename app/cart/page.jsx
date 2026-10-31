@@ -7,6 +7,7 @@ import { useCart } from "@/components/CartProvider";
 import { PLATFORM_FEE } from "@/lib/config";
 import { money } from "@/lib/format";
 import MixedTradeNotice, { cartTrades } from "@/components/MixedTradeNotice";
+import RecentBookings from "@/components/RecentBookings";
 
 export default function CartPage() {
   const { items, qty, add, remove, count } = useCart();
@@ -89,6 +90,7 @@ export default function CartPage() {
                 : <Link className="btn green full mt24" href="/register?next=%2Fcart">Create an account to continue</Link>}
             </>
           )}
+          {catalogue && <RecentBookings />}
         </div>
       </main>
       <SiteFooterClient />

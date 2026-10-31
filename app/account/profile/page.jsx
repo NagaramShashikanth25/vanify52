@@ -26,13 +26,8 @@ export default async function AccountProfile() {
   ]);
   const categoryNames = new Map(categories.map((category) => [category.id, category.name]));
   const memberSince = user.created_at
-    ? new Intl.DateTimeFormat("en-IN", { dateStyle: "long", timeZone: "Asia/Kolkata" }).format(new Date(user.created_at))
+    ? new Intl.DateTimeFormat("en-IN", { month: "long", year: "numeric", timeZone: "Asia/Kolkata" }).format(new Date(user.created_at))
     : "Date unavailable";
-  const signInMethod = user.google_id && user.password_hash
-    ? "Google and password"
-    : user.google_id
-      ? "Google"
-      : "Email or mobile and password";
   const statusLabel = partner?.status === "APPROVED"
     ? "Approved"
     : partner?.status === "PENDING"
@@ -62,7 +57,6 @@ export default async function AccountProfile() {
             <div className="profile-facts mt16">
               <div><span>Account type</span><strong>{roleLabels[user.role] || "Vanify account"}</strong></div>
               <div><span>Member since</span><strong>{memberSince}</strong></div>
-              <div><span>Sign-in method</span><strong>{signInMethod}</strong></div>
             </div>
           </section>
 

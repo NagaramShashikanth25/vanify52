@@ -224,6 +224,12 @@ hr{border:0;border-top:1px solid var(--line);margin:0}
 .saved-address-actions{display:flex;align-items:center;gap:14px}
 .saved-address-actions button{font:inherit;font-size:.82rem}
 .saved-address-actions .danger-link{color:var(--danger)}
+.recent-bookings-heading h2{font-size:1.25rem}
+.recent-bookings-list{display:grid;gap:10px}
+.recent-booking{display:grid;gap:8px;color:var(--ink);text-decoration:none}
+.recent-booking:hover{text-decoration:none}
+.recent-booking-top{gap:12px}
+.recent-booking-top>strong{min-width:0}
 .name{font-weight:600;font-size:.95rem;display:flex;align-items:center;gap:6px}
 
 /* ---------- categories ---------- */
