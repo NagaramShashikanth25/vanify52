@@ -1,10 +1,9 @@
 "use client";
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { safeNext } from "@/lib/safe";
 
 export default function LoginForm() {
-  const router = useRouter();
   const params = useSearchParams();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
@@ -23,8 +22,7 @@ export default function LoginForm() {
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error); setBusy(false); return; }
-      router.push(safeNext(params.get("next"), data.next));
-      router.refresh();
+      window.location.replace(safeNext(params.get("next"), data.next));
     } catch {
       setError("Could not reach Vanify. Check your connection and try again.");
       setBusy(false);

@@ -6,11 +6,28 @@ import LoginForm from "@/components/LoginForm";
 import GoogleButton from "@/components/GoogleButton";
 import AuthError from "@/components/AuthError";
 import { googleEnabled } from "@/lib/google";
+import { currentUser } from "@/lib/auth";
+import { safeNext } from "@/lib/safe";
+import { redirect } from "next/navigation";
 
 export const metadata = { title: "Sign in" };
 
 export default async function LoginPage({ searchParams }) {
   const sp = await searchParams;
+  const user = await currentUser();
+  if (user) {
+    const roleDestination = user.role === "ADMIN"
+      ? "/admin"
+      : user.role === "PARTNER"
+        ? user.partner ? "/partner/dashboard" : "/partner/register"
+        : "/account/bookings";
+    const requestedDestination = safeNext(sp?.next, roleDestination);
+    const destination = /^\/(login|register)(?:[?#]|$)/.test(requestedDestination)
+      ? roleDestination
+      : requestedDestination;
+    redirect(destination);
+  }
+
   return (
     <>
       <SiteHeader />
