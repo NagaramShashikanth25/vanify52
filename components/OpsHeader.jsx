@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { Logo } from "./Icons";
-import LogoutButton from "./LogoutButton";
+import AccountMenu from "./AccountMenu";
+import { getSession } from "@/lib/auth";
 
-export default function OpsHeader() {
+export default async function OpsHeader() {
+  const session = await getSession();
   return (
     <header className="topbar ops">
       <div className="wrap bar">
@@ -11,7 +13,7 @@ export default function OpsHeader() {
           <Link href="/admin">Overview</Link>
           <Link href="/admin/partners">Professionals</Link>
           <Link href="/admin/bookings">Bookings</Link>
-          <LogoutButton label="Sign out" />
+          <AccountMenu name={session?.name || "Admin"} role="ADMIN" />
         </nav>
       </div>
     </header>

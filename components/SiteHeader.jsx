@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { Logo } from "./Icons";
 import CartLink from "./CartLink";
-import LogoutButton from "./LogoutButton";
+import AccountMenu from "./AccountMenu";
 
 export default async function SiteHeader() {
   const session = await getSession();
@@ -19,9 +19,8 @@ export default async function SiteHeader() {
           {session?.role === "PARTNER" && <Link href="/partner/dashboard">My jobs</Link>}
           {session ? (
             <>
-              <Link href="/account/bookings">My bookings</Link>
               <CartLink />
-              <LogoutButton />
+              <AccountMenu name={session.name} role={session.role} />
             </>
           ) : (
             <>

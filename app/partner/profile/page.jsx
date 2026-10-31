@@ -1,3 +1,4 @@
+import Link from "next/link";
 import PartnerHeader from "@/components/PartnerHeader";
 import SiteFooter from "@/components/SiteFooter";
 import CoverageEditor from "@/components/CoverageEditor";
@@ -7,7 +8,7 @@ import { ZONES } from "@/lib/config";
 import { initials } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Profile" };
+export const metadata = { title: "Professional settings" };
 
 export default async function PartnerProfile() {
   const user = await pageUser("PARTNER", "ADMIN");
@@ -24,6 +25,7 @@ export default async function PartnerProfile() {
             <div>
               <h1 style={{ fontSize: "1.7rem" }}>{user.name}</h1>
               <p className="sm muted">{user.phone}</p>
+              <Link className="sm" href="/account/profile">Edit personal details</Link>
             </div>
           </div>
 

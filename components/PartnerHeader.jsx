@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Logo } from "./Icons";
-import LogoutButton from "./LogoutButton";
+import AccountMenu from "./AccountMenu";
 import { getSession } from "@/lib/auth";
 
 export default async function PartnerHeader() {
@@ -19,8 +19,7 @@ export default async function PartnerHeader() {
               <Link href="/">Home</Link>
               <Link href="/partner/dashboard">Jobs</Link>
               <Link href="/partner/earnings">Earnings</Link>
-              <Link href="/partner/profile">Profile</Link>
-              <LogoutButton />
+              <AccountMenu name={session.name} role={session.role} />
             </>
           ) : (
             <>
