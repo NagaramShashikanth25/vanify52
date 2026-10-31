@@ -6,7 +6,6 @@ import LoginForm from "@/components/LoginForm";
 import GoogleButton from "@/components/GoogleButton";
 import AuthError from "@/components/AuthError";
 import { googleEnabled } from "@/lib/google";
-import { showDemoLogins } from "@/lib/demo";
 
 export const metadata = { title: "Sign in" };
 
@@ -15,36 +14,31 @@ export default async function LoginPage({ searchParams }) {
   return (
     <>
       <SiteHeader />
-      <main className="section flush" style={{ paddingTop: 48, minHeight: "70vh" }}>
-        <div className="wrap narrow" style={{ maxWidth: 440 }}>
-          <h1 style={{ fontSize: "1.9rem" }}>Sign in</h1>
-          <p className="muted mt8">One account for customers, professionals and staff.</p>
-          <div className="panel mt24">
+      <main className="auth-page">
+        <div className="wrap auth-wrap">
+          <div className="auth-heading">
+            <p className="auth-eyebrow">Welcome back</p>
+            <h1>Sign in</h1>
+            <p>Access your bookings and see service prices with your Vanify account.</p>
+          </div>
+          <div className="panel auth-panel">
             <AuthError code={sp?.error} />
             {googleEnabled() && (
               <>
                 <Suspense fallback={null}>
                   <GoogleButton next={sp?.next || ""} label="Sign in with Google" />
                 </Suspense>
-                <div className="divider">or use your mobile number</div>
+                <div className="divider">or continue with email or mobile</div>
               </>
             )}
             <Suspense fallback={<p className="muted">Loading…</p>}>
               <LoginForm />
             </Suspense>
           </div>
-          <p className="sm mt16">
-            New here? <Link href="/register">Create a customer account</Link> or{" "}
-            <Link href="/partner/register">register as a professional</Link>.
+          <p className="auth-switch">
+            New to Vanify? <Link href="/register">Create a customer account</Link>
           </p>
-          {showDemoLogins() && (
-            <div className="notice mt24">
-              <strong>Demo accounts</strong> — password <code>password123</code> for all three.
-              <div className="xs mt8">
-                Customer 9999900000 · Professional 9876500001 (Ramesh, electrical) · Staff 9000000000
-              </div>
-            </div>
-          )}
+          <p className="auth-partner">Joining as a service professional? <Link href="/partner/register">Register here</Link>.</p>
         </div>
       </main>
       <SiteFooter />

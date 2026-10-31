@@ -7,6 +7,7 @@ import CartBar from "@/components/CartBar";
 import { CategoryIcon } from "@/components/Icons";
 import { getCategory, listApprovedPartners, listServices } from "@/lib/repo";
 import { money } from "@/lib/format";
+import { getSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -21,8 +22,13 @@ export default async function CategoryPage({ params }) {
   const category = await getCategory(slug);
   if (!category) notFound();
 
-  const services = await listServices(category.id);
-  const pros = (await listApprovedPartners()).filter((p) => p.skills.split(",").includes(category.id));
+  const [services, approved, session] = await Promise.all([
+    listServices(category.id), listApprovedPartners(), getSession(),
+  ]);
+  const pros = approved.filter((p) => p.skills.split(",").includes(category.id));
+  const pricesVisible = Boolean(session);
+  const registerHref = `/register?next=${encodeURIComponent(`/services/${category.id}`)}`;
+  const loginHref = `/login?next=${encodeURIComponent(`/services/${category.id}`)}`;
 
   return (
     <>
@@ -48,6 +54,13 @@ export default async function CategoryPage({ params }) {
             </div>
           )}
 
+          {!pricesVisible && (
+            <div className="notice green mt16">
+              Create a free account to see service prices and add services to your booking.{" "}
+              <Link href={registerHref}>Create an account</Link> or <Link href={loginHref}>sign in</Link>.
+            </div>
+          )}
+
           <div className="card mt24">
             {services.map((s) => (
               <div className="svc" key={s.id}>
@@ -56,8 +69,12 @@ export default async function CategoryPage({ params }) {
                   <div className="detail">{s.detail} · about {s.minutes} min</div>
                 </div>
                 <div className="right">
-                  <div className="price">{s.price ? money(s.price) : "Free visit"}</div>
-                  <AddToCart serviceId={s.id} free={!s.price} />
+                  <div className={pricesVisible ? "price" : "price price-gated"}>
+                    {pricesVisible ? s.price ? money(s.price) : "Free visit" : "Sign in to view price"}
+                  </div>
+                  {pricesVisible
+                    ? <AddToCart serviceId={s.id} free={!s.price} />
+                    : <Link className="btn ghost s mt8" href={registerHref}>Create account</Link>}
                 </div>
               </div>
             ))}

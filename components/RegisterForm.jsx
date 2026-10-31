@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { safeNext } from "@/lib/safe";
 
-export default function RegisterForm() {
+export default function RegisterForm({ next = "" }) {
   const router = useRouter();
   const [form, setForm] = useState({ name: "", phone: "", email: "", password: "" });
   const [error, setError] = useState(null);
@@ -14,13 +15,18 @@ export default function RegisterForm() {
   async function submit(e) {
     e.preventDefault();
     setError(null); setField(null); setBusy(true);
-    const res = await fetch("/api/auth/register", {
-      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form),
-    });
-    const data = await res.json();
-    if (!res.ok) { setError(data.error); setField(data.field); setBusy(false); return; }
-    router.push("/account/bookings");
-    router.refresh();
+    try {
+      const res = await fetch("/api/auth/register", {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error); setField(data.field); setBusy(false); return; }
+      router.push(safeNext(next, "/account/bookings"));
+      router.refresh();
+    } catch {
+      setError("Could not reach Vanify. Check your connection and try again.");
+      setBusy(false);
+    }
   }
 
   return (
@@ -36,16 +42,18 @@ export default function RegisterForm() {
           placeholder="10-digit number" />
       </div>
       <div className={`field ${field === "email" ? "bad" : ""}`}>
-        <label htmlFor="email">Email (optional)</label>
-        <input id="email" type="email" value={form.email} onChange={set("email")} autoComplete="email" />
+        <label htmlFor="email">Email address <span className="field-optional">Optional</span></label>
+        <input id="email" type="email" value={form.email} onChange={set("email")} autoComplete="email"
+          placeholder="you@example.com" />
+        <p className="hint">Add an email to sign in with either your email or mobile number.</p>
       </div>
       <div className={`field ${field === "password" ? "bad" : ""}`}>
         <label htmlFor="password">Password</label>
         <input id="password" type="password" value={form.password} onChange={set("password")}
           autoComplete="new-password" placeholder="At least 8 characters" />
       </div>
-      {error && <div className="notice error" style={{ marginBottom: 14 }}>{error}</div>}
-      <button className="btn full" disabled={busy}>{busy ? "Creating…" : "Create account"}</button>
+      {error && <div className="notice error" role="alert" style={{ marginBottom: 14 }}>{error}</div>}
+      <button className="btn green full auth-submit" disabled={busy}>{busy ? "Creating…" : "Create account"}</button>
     </form>
   );
 }

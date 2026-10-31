@@ -6,19 +6,22 @@ import { CategoryIcon } from "@/components/Icons";
 import { categoryMinPrices, listApprovedPartners, listCategories } from "@/lib/repo";
 import { money } from "@/lib/format";
 import { CITY, ZONES } from "@/lib/config";
+import { getSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 const STEPS = [
-  ["Choose a service", "Browse service descriptions and listed labour prices. The checkout shows the total before you confirm."],
+  ["Choose a service", "Browse service descriptions. Sign in to view prices and the total before you confirm."],
   ["Send a request", "Choose an area and time. A request is confirmed only after a professional accepts it."],
   ["Pay after the work", "Payment is arranged with the professional after the service, by cash or UPI."],
 ];
 
 export default async function HomePage() {
-  const [categories, approved, minPrice] = await Promise.all([
-    listCategories(), listApprovedPartners(), categoryMinPrices(),
+  const [categories, approved, session] = await Promise.all([
+    listCategories(), listApprovedPartners(), getSession(),
   ]);
+  const pricesVisible = Boolean(session);
+  const minPrice = pricesVisible ? await categoryMinPrices() : {};
 
   return (
     <>
@@ -29,10 +32,16 @@ export default async function HomePage() {
             <p className="home-kicker"><span aria-hidden="true" /> Home services in {CITY}</p>
             <h1>Find the right help for your home.</h1>
             <p className="home-lede">
-              Explore services, compare listed labour prices, and see the full amount before you send a booking request.
+              {pricesVisible
+                ? "Explore services, compare listed labour prices, and see the full amount before you send a booking request."
+                : "Explore service options. Create a free account to see prices and the full amount before you send a booking request."}
             </p>
             <ServiceSearch />
-            <p className="home-hero-note">No advance payment · Cash or UPI after the service · Materials are separate</p>
+            <p className="home-hero-note">
+              {pricesVisible
+                ? "No advance payment · Cash or UPI after the service · Materials are separate"
+                : <>No advance payment · Materials are separate · <Link href="/register?next=%2F">Create a free account to see prices</Link></>}
+            </p>
           </div>
         </section>
 
@@ -42,7 +51,7 @@ export default async function HomePage() {
             <h2>{approved.length === 0 ? "We’re just getting started" : "Approved professionals on Vanify"}</h2>
             <p>
               {approved.length === 0
-                ? `Vanify is new, and we don’t have any approved professionals yet. You can browse services and prices, but booking requests may not be accepted until professionals are approved in ${CITY}.`
+                ? `Vanify is new, and we don’t have any approved professionals yet. Create an account to see service prices; booking requests may not be accepted until professionals are approved in ${CITY}.`
                 : `${approved.length} professional${approved.length === 1 ? " is" : "s are"} approved on Vanify. Availability depends on the service, area, and time; a request is confirmed only when a professional accepts it.`}
             </p>
           </div>
@@ -55,7 +64,11 @@ export default async function HomePage() {
               <div>
                 <p className="home-eyebrow">Explore the catalogue</p>
                 <h2>What would you like help with?</h2>
-                <p>Prices shown are labour charges. Materials, if needed, are discussed separately before purchase.</p>
+                <p>
+                  {pricesVisible
+                    ? "Prices shown are labour charges. Materials, if needed, are discussed separately before purchase."
+                    : "Browse service types. Sign in to see labour prices; materials, if needed, are discussed separately."}
+                </p>
               </div>
               <Link className="linkbtn" href="/services">See all services →</Link>
             </div>
@@ -66,11 +79,18 @@ export default async function HomePage() {
                   <h3>{category.name}</h3>
                   <span className="sm muted">{category.blurb}</span>
                   <span className="from">
-                    {minPrice[category.id] ? <>From <strong>{money(minPrice[category.id])}</strong></> : "View services"}
+                    {pricesVisible
+                      ? minPrice[category.id] ? <>From <strong>{money(minPrice[category.id])}</strong></> : "View services"
+                      : "Sign in to view prices"}
                   </span>
                 </Link>
               ))}
             </div>
+            {!pricesVisible && (
+              <p className="home-price-cta">
+                <Link href="/register?next=%2F">Create a free account to view prices</Link>
+              </p>
+            )}
             <p className="xs muted mt12">The final total, including the platform fee, is shown before you place a request.</p>
           </div>
         </section>

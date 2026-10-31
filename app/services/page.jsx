@@ -6,13 +6,16 @@ import CartBar from "@/components/CartBar";
 import { CategoryIcon } from "@/components/Icons";
 import { listCategories, listServices } from "@/lib/repo";
 import { money } from "@/lib/format";
+import { getSession } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "All services" };
 
 export default async function ServicesPage() {
-  const categories = await listCategories();
-  const services = await listServices();
+  const [categories, services, session] = await Promise.all([
+    listCategories(), listServices(), getSession(),
+  ]);
+  const pricesVisible = Boolean(session);
 
   return (
     <>
@@ -21,7 +24,11 @@ export default async function ServicesPage() {
         <div className="wrap">
           <div className="section-head">
             <h1 style={{ fontSize: "2.2rem" }}>All services</h1>
-            <p>Fixed price per job. Add what you need and book one slot for all of it.</p>
+            <p>
+              {pricesVisible
+                ? "Listed prices are labour charges. Review the total before you send a booking request."
+                : "Browse the service catalogue. Create a free account to view prices and continue to booking."}
+            </p>
           </div>
 
           {categories.map((c) => (
@@ -41,8 +48,12 @@ export default async function ServicesPage() {
                       <div className="detail">{s.detail}</div>
                     </div>
                     <div className="right">
-                      <div className="price">{s.price ? money(s.price) : "Free visit"}</div>
-                      <AddToCart serviceId={s.id} free={!s.price} />
+                      <div className={pricesVisible ? "price" : "price price-gated"}>
+                        {pricesVisible ? s.price ? money(s.price) : "Free visit" : "Sign in to view price"}
+                      </div>
+                      {pricesVisible
+                        ? <AddToCart serviceId={s.id} free={!s.price} />
+                        : <Link className="btn ghost s mt8" href="/register?next=%2Fservices">Create account</Link>}
                     </div>
                   </div>
                 ))}

@@ -7,24 +7,30 @@ import { googleEnabled } from "@/lib/google";
 
 export const metadata = { title: "Create an account" };
 
-export default function RegisterPage() {
+export default async function RegisterPage({ searchParams }) {
+  const params = await searchParams;
+  const next = typeof params?.next === "string" ? params.next : "";
   return (
     <>
       <SiteHeader />
-      <main className="section flush" style={{ paddingTop: 48, minHeight: "70vh" }}>
-        <div className="wrap narrow" style={{ maxWidth: 440 }}>
-          <h1 style={{ fontSize: "1.9rem" }}>Create your account</h1>
-          <p className="muted mt8">You need one to book a professional and track the job.</p>
-          <div className="panel mt24">
+      <main className="auth-page">
+        <div className="wrap auth-wrap">
+          <div className="auth-heading">
+            <p className="auth-eyebrow">Get started with Vanify</p>
+            <h1>Create your account</h1>
+            <p>Create an account to view service prices and send booking requests.</p>
+          </div>
+          <div className="panel auth-panel">
             {googleEnabled() && (
               <>
-                <GoogleButton label="Sign up with Google" />
-                <div className="divider">or sign up with your mobile number</div>
+                <GoogleButton next={next} label="Sign up with Google" />
+                <div className="divider">or create an account with your details</div>
               </>
             )}
-            <RegisterForm />
+            <RegisterForm next={next} />
           </div>
-          <p className="sm mt16">Already have an account? <Link href="/login">Sign in</Link>.</p>
+          <p className="auth-switch">Already have an account? <Link href="/login">Sign in</Link>.</p>
+          <p className="auth-partner">Joining as a service professional? <Link href="/partner/register">Register here</Link>.</p>
         </div>
       </main>
       <SiteFooter />

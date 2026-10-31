@@ -12,9 +12,14 @@ export default function CartPage() {
   const { items, qty, add, remove, count } = useCart();
   const [catalogue, setCatalogue] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [pricesVisible, setPricesVisible] = useState(false);
 
   useEffect(() => {
-    fetch("/api/services").then((r) => r.json()).then((d) => { setCatalogue(d.services); setCategories(d.categories || []); })
+    fetch("/api/services").then((r) => r.json()).then((d) => {
+      setCatalogue(d.services);
+      setCategories(d.categories || []);
+      setPricesVisible(Boolean(d.pricesVisible));
+    })
       .catch(() => setCatalogue([]));
   }, []);
 
@@ -49,7 +54,7 @@ export default function CartPage() {
                       <div className="detail">{l.detail}</div>
                     </div>
                     <div className="right">
-                      <div className="price">{money(l.price * l.q)}</div>
+                      {pricesVisible && <div className="price">{money(l.price * l.q)}</div>}
                       <div className="stepper">
                         <button onClick={() => remove(l.id)} aria-label={`Remove one ${l.name}`}>−</button>
                         <span>{qty(l.id)}</span>
@@ -60,20 +65,28 @@ export default function CartPage() {
                 ))}
               </div>
 
-              <div className="card mt16">
-                <div className="row between"><span>Item total</span><span className="price">{money(total)}</span></div>
-                <div className="row between mt8"><span>Platform fee</span><span className="price">{money(PLATFORM_FEE)}</span></div>
-                <hr className="mt16" />
-                <div className="row between mt16">
-                  <strong>Payable after the service</strong>
-                  <strong className="price">{money(total + PLATFORM_FEE)}</strong>
+              {pricesVisible ? (
+                <div className="card mt16">
+                  <div className="row between"><span>Item total</span><span className="price">{money(total)}</span></div>
+                  <div className="row between mt8"><span>Platform fee</span><span className="price">{money(PLATFORM_FEE)}</span></div>
+                  <hr className="mt16" />
+                  <div className="row between mt16">
+                    <strong>Payable after the service</strong>
+                    <strong className="price">{money(total + PLATFORM_FEE)}</strong>
+                  </div>
+                  <p className="xs muted mt8">Nothing is charged now. Pay by cash or UPI once the job is finished.</p>
                 </div>
-                <p className="xs muted mt8">Nothing is charged now. Pay by cash or UPI once the job is finished.</p>
-              </div>
+              ) : (
+                <div className="notice green mt16">
+                  Sign in or create a free account to view prices and continue to booking.
+                </div>
+              )}
 
               <MixedTradeNotice lines={lines} categories={categories} />
 
-              <Link className="btn hivis full mt24" href="/checkout" aria-disabled={mixed}>Choose a slot</Link>
+              {pricesVisible
+                ? <Link className="btn hivis full mt24" href="/checkout" aria-disabled={mixed}>Choose a slot</Link>
+                : <Link className="btn green full mt24" href="/register?next=%2Fcart">Create an account to continue</Link>}
             </>
           )}
         </div>

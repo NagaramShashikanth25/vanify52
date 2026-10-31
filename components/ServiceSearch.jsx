@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 export default function ServiceSearch() {
   const [q, setQ] = useState("");
   const [hits, setHits] = useState([]);
+  const [pricesVisible, setPricesVisible] = useState(false);
   const [open, setOpen] = useState(false);
   const box = useRef(null);
 
@@ -15,6 +16,7 @@ export default function ServiceSearch() {
         const res = await fetch("/api/services/search?q=" + encodeURIComponent(q));
         const data = await res.json();
         setHits(data.services || []);
+        setPricesVisible(Boolean(data.pricesVisible));
         setOpen(true);
       } catch {}
     }, 180);
@@ -40,7 +42,9 @@ export default function ServiceSearch() {
           {hits.length ? hits.map((s) => (
             <Link key={s.id} href={`/services/${s.category_id}`} onClick={() => setOpen(false)}>
               <span>{s.name}</span>
-              <span className="muted">{s.price ? "₹" + s.price : "Free visit"}</span>
+              <span className="muted">
+                {pricesVisible ? s.price ? "₹" + s.price : "Free visit" : "Sign in to view price"}
+              </span>
             </Link>
           )) : (
             <div style={{ padding: "12px 14px", color: "var(--muted)", fontSize: ".9rem" }}>

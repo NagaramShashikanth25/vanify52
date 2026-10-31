@@ -74,9 +74,11 @@ const svc = (name) => {
   return s;
 };
 
-async function newCustomer() {
+async function newCustomer(email = null) {
   const b = new Browser();
-  const r = await b.post("/api/auth/register", { name: "Test Customer", phone: nextPhone(), password: "password123" });
+  const r = await b.post("/api/auth/register", {
+    name: "Test Customer", phone: nextPhone(), email, password: "password123",
+  });
   if (r.status !== 200) throw new Error("register failed " + r.status + " " + r.text);
   return b;
 }
@@ -140,6 +142,37 @@ await test(CORE, "Login is throttled after 5 tries on one number", async () => {
   let last;
   for (let i = 0; i < 6; i++) last = await b.login("9888800000", "nope");
   eq(last.status, 429, "6th attempt");
+});
+
+await test(CORE, "A customer can sign in with their email address", async () => {
+  const email = `signin-${Date.now()}@example.com`;
+  await newCustomer(email);
+  const b = new Browser();
+  const r = await b.post("/api/auth/login", { identifier: email.toUpperCase(), password: "password123" });
+  eq(r.status, 200, "email sign-in");
+  expect(b.jar.vn_session, "email sign-in did not create a session");
+});
+
+await test(CORE, "Public service endpoints do not reveal prices before sign-in", async () => {
+  const b = new Browser();
+  const list = await b.req("/api/services");
+  eq(list.json.pricesVisible, false, "public catalogue price access");
+  expect(list.json.services.every((service) => service.price === null), "catalogue price leaked");
+
+  const search = await b.req("/api/services/search?q=fan");
+  eq(search.json.pricesVisible, false, "public search price access");
+  expect(search.json.services.every((service) => service.price === null), "search price leaked");
+
+  const sample = await q1("SELECT category_id, price FROM services WHERE active AND price > 0 ORDER BY price LIMIT 1");
+  const home = await b.req("/");
+  expect(!home.text.includes(`₹${sample.price}`), "homepage price leaked");
+  const category = await b.req(`/services/${sample.category_id}`);
+  expect(!category.text.includes(`₹${sample.price}`), "category page price leaked");
+
+  const customer = await newCustomer();
+  const signedInList = await customer.req("/api/services");
+  eq(signedInList.json.pricesVisible, true, "signed-in catalogue price access");
+  expect(signedInList.json.services.some((service) => typeof service.price === "number"), "signed-in prices missing");
 });
 
 await test(CORE, "A customer cannot open the Ops console or call staff APIs", async () => {
